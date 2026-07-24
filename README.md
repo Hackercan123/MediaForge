@@ -4,6 +4,8 @@ HandBrake + YouTube indirici karışımı, Türkçe arayüzlü medya araç kutus
 Arka planda **ffmpeg** ve **yt-dlp** çalıştırır. Araç arama sırası:
 Ayarlar'daki özel yol → program yanındaki `bin\` klasörü → PATH.
 
+![MediaForge — Dönüştür sekmesi](ekran.png)
+
 ## Portable dağıtım
 
 `dist\` klasörü kendi başına taşınabilir paket:
