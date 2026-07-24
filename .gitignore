@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# Harici araçlar ve kullanıcı verisi
+bin/
+ayarlar.json
+MediaForge-portable.zip
