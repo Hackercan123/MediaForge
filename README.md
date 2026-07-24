@@ -45,8 +45,8 @@ python MediaForge.py
   H.264, H.265 ve destekleyen kartlarda AV1.
 - **Araçlar** — medya bilgisi (ffprobe), kayıpsız/kare hassas video kesme, videodan ses çıkarma,
   video birleştirme (kayıpsız concat veya farklı kaynakları uyumlayan yeniden kodlama).
-- **Kuyruk** — tüm işler tek tabloda: ilerleme çubuğu, hız, kalan süre, iptal, günlük
-  (satıra çift tıklayınca ffmpeg/yt-dlp çıktısı).
+- **Kuyruk** — tüm işler tek tabloda: ilerleme çubuğu, hız, kalan süre, duraklat/devam et,
+  iptal, günlük (satıra çift tıklayınca ffmpeg/yt-dlp çıktısı).
 
 ## Notlar
 

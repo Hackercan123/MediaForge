@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import collections
+import ctypes
 import itertools
 import os
 import re
@@ -13,11 +14,29 @@ from araclar import insan_zaman
 
 BEKLIYOR = "Bekliyor"
 CALISIYOR = "Çalışıyor"
+DURAKLADI = "Duraklatıldı"
 BITTI = "Bitti"
 HATA = "Hata"
 IPTAL = "İptal"
 
-AKTIF = (BEKLIYOR, CALISIYOR)
+AKTIF = (BEKLIYOR, CALISIYOR, DURAKLADI)
+
+
+def _surec_askiya(pid: int, askiya: bool) -> bool:
+    """Süreci askıya alır/uyandırır (NtSuspendProcess — Windows'un tek yolu)."""
+    if os.name != "nt" or not pid:
+        return False
+    PROCESS_SUSPEND_RESUME = 0x0800
+    cekirdek = ctypes.windll.kernel32
+    tanit = cekirdek.OpenProcess(PROCESS_SUSPEND_RESUME, False, int(pid))
+    if not tanit:
+        return False
+    try:
+        nt = ctypes.windll.ntdll
+        sonuc = nt.NtSuspendProcess(tanit) if askiya else nt.NtResumeProcess(tanit)
+        return sonuc == 0
+    finally:
+        cekirdek.CloseHandle(tanit)
 
 
 class Is(QObject):
@@ -92,12 +111,36 @@ class Is(QObject):
     def iptal(self):
         self._iptal_istendi = True
         if self.surec and self.surec.state() != QProcess.NotRunning:
+            if self.durum == DURAKLADI:
+                # Askıdaki süreç sonlandırmadan önce uyandırılır
+                _surec_askiya(self.surec.processId(), False)
             self.surec.kill()
-        elif self.durum == BEKLIYOR:
+        elif self.durum in (BEKLIYOR, DURAKLADI):
             self.durum = IPTAL
             self.detay = ""
             self.degisti.emit()
             self.bitti_sinyali.emit(self)
+
+    def duraklat(self):
+        if self.durum == CALISIYOR and self.surec and self.surec.state() != QProcess.NotRunning:
+            if _surec_askiya(self.surec.processId(), True):
+                self.durum = DURAKLADI
+                self.degisti.emit()
+        elif self.durum == BEKLIYOR:
+            # Sırası gelse de başlatılmaz; devam edince yeniden kuyruğa girer
+            self.durum = DURAKLADI
+            self.degisti.emit()
+
+    def devam_et(self):
+        if self.durum != DURAKLADI:
+            return
+        if self.surec and self.surec.state() != QProcess.NotRunning:
+            if _surec_askiya(self.surec.processId(), False):
+                self.durum = CALISIYOR
+                self.degisti.emit()
+        else:
+            self.durum = BEKLIYOR
+            self.degisti.emit()
 
     # --- iç işleyiş ---
     def _oku_out(self):

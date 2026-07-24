@@ -38,7 +38,11 @@ class SekmeKuyruk(QWidget):
         duzen.addWidget(self.tablo)
 
         satir = QHBoxLayout()
-        iptal = QPushButton("Seçileni İptal Et")
+        duraklat = QPushButton("Duraklat")
+        duraklat.clicked.connect(self._secileni_duraklat)
+        devam = QPushButton("Devam Et")
+        devam.clicked.connect(self._secileni_devam)
+        iptal = QPushButton("İptal Et")
         iptal.clicked.connect(self._secileni_iptal)
         klasor = QPushButton("Klasörü Aç")
         klasor.clicked.connect(self._klasor_ac)
@@ -46,6 +50,8 @@ class SekmeKuyruk(QWidget):
         gunluk.clicked.connect(self._gunluk_goster)
         temizle = QPushButton("Bitenleri Temizle")
         temizle.clicked.connect(self.kuyruk_yon.temizle_bitenler)
+        satir.addWidget(duraklat)
+        satir.addWidget(devam)
         satir.addWidget(iptal)
         satir.addWidget(klasor)
         satir.addWidget(gunluk)
@@ -117,6 +123,18 @@ class SekmeKuyruk(QWidget):
         is_ = self._secili_is()
         if is_:
             is_.iptal()
+
+    def _secileni_duraklat(self):
+        is_ = self._secili_is()
+        if is_:
+            is_.duraklat()
+
+    def _secileni_devam(self):
+        is_ = self._secili_is()
+        if is_:
+            is_.devam_et()
+            # Bekleyen durumdan dönen iş için sıra denetimi
+            self.kuyruk_yon.pompala()
 
     def _klasor_ac(self):
         is_ = self._secili_is()
